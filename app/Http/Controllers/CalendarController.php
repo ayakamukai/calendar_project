@@ -23,6 +23,7 @@ class CalendarController extends Controller
         }else{
             $month = date('n');
         }
+
         //日付チェック
         if(!(checkdate($month, 1, $year))){
             header('Location: calendar.php');
@@ -39,31 +40,27 @@ class CalendarController extends Controller
         $next_month = date('n', mktime(0, 0, 0, $month+1, 1, $year));
         $last_month_year = date('Y', mktime(0, 0, 0, $month-1, 1, $year));
         $next_month_year = date('Y', mktime(0, 0, 0, $month+1, 1, $year));
-        
+
         try {
             // ファイルの読み込み
             $file = new \SplFileObject(storage_path('app/public/syukujitsu.csv'));
-            
-            $file->setFlags(\SplFileObject::READ_CSV);           // CSV 列として行を読み込む
-            //   \SplFileObject::READ_AHEAD       // 先読み/巻き戻しで読み出す。
-            // //   \SplFileObject::SKIP_EMPTY |         // 空行は読み飛ばす
-            // //   \SplFileObject::DROP_NEW_LINE    // 行末の改行を読み飛ばす
+            $file->setFlags(
+                \SplFileObject::READ_CSV     |
+                \SplFileObject::READ_AHEAD   |
+                \SplFileObject::SKIP_EMPTY   |
+                \SplFileObject::DROP_NEW_LINE
+            );
 
-            $csv = mb_convert_encoding($file, 'UTF-8', 'SJIS');
-            var_dump($csv);
-            $lines = explode("\n", $csv);  //改行で分割 (1=>日付,祝日)の配列
-            echo "<br>";
-            var_dump($lines);
             $holidays = [];
-            // foreach ($lines as $line) {
-            // $holiday = explode(",", $line); //カンマで分割 (1=>祝日,2=>祝日)の配列s
-            // $holidays[$holiday[0]] = $holiday[1]; //(日付=>祝日)の連想配列
-            // }
+            foreach($file as $line){
+                $lines = mb_convert_encoding($line, 'UTF-8', 'SJIS');
+                $holidays[$lines[0]] = $lines[1]; //(日付=>祝日)の連想配列
+            }
             // var_dump($holidays);
 
-        } catch (PDOException $e) {
+            } catch (PDOException $e) {
             echo $e->getMessage();
-        }
+            }
 
         return view('calendars.calendar', ['year' => $year, 'month' => $month, 'last_month' => $last_month, 'last_month_year' => $last_month_year, 'next_month' => $next_month, 'next_month_year' => $next_month_year,
         'weeks' => $weeks, 'first_weekday' => $first_weekday, 'final_weekday' => $final_weekday, 'holidays' => $holidays, 'last_day' => $last_day, 'today' => $today]);
