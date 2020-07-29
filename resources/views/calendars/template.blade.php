@@ -1,52 +1,53 @@
-<?php
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>  @yield('title')</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+  <style type="text/css">
+    body {
+      background-color: #FFF;
+    }
+    th {
+      background-color: #FFFFCC;
+    }
+    .sunday, td.sunday a{
+        color: red;
+    }
+    .saturday, td.saturday a{
+      color: blue;
+    }
+    td.holiday a{
+      color: red;
+    }
+    a{
+      color: #000;
+    }
+    .today {
+      background: #99FFFF;
+    }
+    .left {
+      text-align: left;
+    }
+    .center {
+      text-align: center;
+    }
+    .right {
+      text-align: right;
+    }
+    .has_plan {
+      font-weight: 700;
+    }
+  </style>
+</head>
 
-//任意の年月と正規表現チェック
-if(isset($_GET['year']) && preg_match('/^[0-9]{4}$/', $_GET['year'])){
-  $year = $_GET['year'];
-}else{
-  $year = date('Y');
-}
+@yield('content')
 
-if(isset($_GET['month']) && preg_match('/^[0-9]{1,2}$/', $_GET['month'])){
-  $month =  $_GET['month']; 
-}else{
-  $month = date('n');
-}
-//日付チェック
-if(!(checkdate($month, 1, $year))){
-  header('Location: calendar.php');
-  exit;
-}
-
-//DB接続
-try {
-  $dbh = new PDO(PDO_DSN,DB_USERNAME,DB_PASSWORD,
-    [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_EMULATE_PREPARES => false,
-    ]
-      );
-  // if ($dbh == null){
-  //   echo '接続に失敗しました。<br>';
-  // }else{
-  //   echo '接続に成功しました。<br>';
-  // }
-
-  //データ検索範囲
-  $start = $year.'-'.$month.'-1';
-  $end = $year.'-'.$month.'-31';
-  
-  $sql = 'select date from calendars where date between ? and ? order by date asc';
-  $stmt = $dbh->prepare($sql);
-  $stmt->bindValue(1,$start);
-  $stmt->bindValue(2,$end);
-  $stmt->execute();
-  $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-} catch (PDOException $e) {
-    echo $e->getMessage();
-}
-
-$plan_date_db = [];
-foreach ($results as $result) {
-$plan_date_db[] = $result['date']; //日付のみの配列
-}
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+  <script>
+    $("[data-toggle='tooltip']").tooltip()
+  </script>
+</body>
+</html>
