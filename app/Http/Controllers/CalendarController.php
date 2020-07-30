@@ -4,30 +4,23 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Exception;
+use App\Http\Requests\CalendarRequest;
 
 class CalendarController extends Controller
 {
     //カレンダー画面
-    public function index()
+    public function index(CalendarRequest $request)
     {
-        
-        //任意の年月と正規表現チェック
-        if(isset($_GET['year']) && preg_match('/^[0-9]{4}$/', $_GET['year'])){
-            $year = $_GET['year'];
+        // 任意の年月
+        if($request->query('year')){
+            $year = $request->query('year');
         }else{
             $year = date('Y');
         }
-        
-        if(isset($_GET['month']) && preg_match('/^[0-9]{1,2}$/', $_GET['month'])){
-            $month =  $_GET['month']; 
+        if($request->query('month')){
+            $month = $request->query('month');
         }else{
             $month = date('n');
-        }
-
-        //日付チェック
-        if(!(checkdate($month, 1, $year))){
-            header('Location: calendar.php');
-            exit;
         }
 
         $today = date("j"); // 現在の日 
@@ -42,7 +35,7 @@ class CalendarController extends Controller
         $next_month_year = date('Y', mktime(0, 0, 0, $month+1, 1, $year));
 
         try {
-            // ファイルの読み込み
+            //ファイルの読み込み
             $file = new \SplFileObject(storage_path('app/public/syukujitsu.csv'));
             $file->setFlags(
                 \SplFileObject::READ_CSV     |
