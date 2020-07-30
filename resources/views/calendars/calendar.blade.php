@@ -43,11 +43,11 @@
 
           <!-- 日付繰り返し -->
           @for($i=1; $i<=$last_day; $i++)
-          <?php
-            $day_of_week = date("w", mktime(0,0,0, $month, $i, $year));  //$i日の曜日 -->
+          @php
+            $day_of_week = date("w", mktime(0,0,0, $month, $i, $year));  //<!-- $i日の曜日 -->
             $date = date('Y/n/j', mktime(0,0,0, $month, $i, $year));  //<!-- $year/$month/$i -->
             $date_db = date('Y-m-d', mktime(0,0,0, $month, $i, $year));  //<!-- $year-$month-$i -->
-          ?>
+          @endphp
 
             <!-- 週始め -->
             @if($day_of_week == 0)
@@ -55,7 +55,7 @@
             @endif
 
             <!-- cssクラス設定  -->
-            <?php
+            @php
               if($day_of_week == 0){
                 $css_class = "sunday";
               }elseif($day_of_week == 6){;
@@ -67,7 +67,7 @@
               if($i == $today && $month == date('n') && $year == date('Y')){
                 $css_class = $css_class." today";
               }
-            ?>
+            @endphp
 
               <!-- //予定の有無
               // if (in_array($date_db, $plan_date_db)) {
@@ -97,7 +97,6 @@
 
           <!-- 最後の閉じ -->
           @if($final_weekday == 6)
-            ""
           @else
             </tr>
           @endif
