@@ -51,7 +51,7 @@ class CalendarController extends Controller
             }
             // var_dump($holidays);
 
-            } catch (PDOException $e) {
+            } catch (Exception $e) {
             echo $e->getMessage();
             }
 

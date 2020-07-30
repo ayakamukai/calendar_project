@@ -10,13 +10,13 @@
       <h3 class="text-center">{{ $year }}年{{ $month }}月</h3>
           <div class="row">
             <div class="col left">
-              <a href="?month={{ $last_month }}&year={{ $last_month_year }}">＜＜{{ $last_month }}月</a>
+              <a href={{ route('calendar', ['month' => $last_month, 'year' => $last_month_year]) }}>＜＜{{ $last_month }}月</a>
             </div>
             <div class="col center">
               <a href="/">今月</a>
             </div>
             <div class="col right">
-              <a href="?month={{ $next_month }}&year={{ $next_month_year }}">{{ $next_month }}月＞＞</a>
+              <a href={{ route('calendar', ['month' => $next_month, 'year' => $next_month_year]) }}>{{ $next_month }}月＞＞</a>
             </div>
           </div>
       <table class="table table-bordered text-center">
@@ -76,9 +76,9 @@
 
               <!-- 祝日名 -->
               @if(isset($holidays[$date]))
-                <td class="{{ $css_class }} holiday" data-toggle="tooltip" title="{{ $holidays[$date] }}"><a href="schedule.php?schedule={{ $date }}">{{ $i }}</a></td>
+                <td class="{{ $css_class }} holiday" data-toggle="tooltip" title="{{ $holidays[$date] }}"><a href="">{{ $i }}</a></td>
               @else
-                <td class="{{ $css_class }}"><a href="schedule.php?schedule={{ $date }}">{{ $i }}</a></td>  <!-- 日終わり -->
+                <td class="{{ $css_class }}"><a href="">{{ $i }}</a></td>  <!-- 日終わり -->
               @endif
 
               <!-- 週末折り返し -->
