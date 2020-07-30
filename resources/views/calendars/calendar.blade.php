@@ -64,7 +64,7 @@
                 $css_class = "weekday";
               }
 
-              if($i == $today && $month == date('n') && $year == date('Y')){
+              if($date_db == $today){
                 $css_class = $css_class." today";
               }
             @endphp

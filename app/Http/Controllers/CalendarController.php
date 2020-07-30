@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Exception;
 use App\Http\Requests\CalendarRequest;
+use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class CalendarController extends Controller
 {
@@ -23,37 +25,35 @@ class CalendarController extends Controller
             $month = date('n');
         }
 
-        $today = date("j"); // 現在の日 
         $weeks = ['日','月','火','水','木','金','土'];
-        $first_weekday = date("w", mktime(0,0,0, $month, 1, $year)); //初日の曜日
-        $final_weekday = date("w", mktime(0,0,0, $month+1, 0, $year)); //月末日の曜日
-        $last_day = date("j", mktime(0,0,0, $month+1, 0, $year)); //任意の月の末日
+        $today = Carbon::today()->format('Y-m-d'); //今日
+        $first_weekday = Carbon::create($year, $month, 1, 0,0,0)->format('w');  //初日の曜日
+        $final_weekday = Carbon::create($year, $month+1, 0, 0,0,0)->format('w');  //月末日の曜日
+        $last_day = Carbon::create($year, $month+1, 0, 0,0,0)->format('j'); //任意の月の末日
 
-        $last_month = date('n', mktime(0, 0, 0, $month-1, 1, $year));
-        $next_month = date('n', mktime(0, 0, 0, $month+1, 1, $year));
-        $last_month_year = date('Y', mktime(0, 0, 0, $month-1, 1, $year));
-        $next_month_year = date('Y', mktime(0, 0, 0, $month+1, 1, $year));
+        $last_month = Carbon::create($year, $month-1, 1, 0,0,0)->format('n');
+        $next_month = Carbon::create($year, $month+1, 1, 0,0,0)->format('n');
+        $last_month_year = Carbon::create($year, $month-1, 1, 0,0,0)->format('Y');
+        $next_month_year = Carbon::create($year, $month+1, 1, 0,0,0)->format('Y');
 
+        $holidays = [];
         try {
             //ファイルの読み込み
-            $file = new \SplFileObject(storage_path('app/public/syukujitsu.csv'));
-            $file->setFlags(
-                \SplFileObject::READ_CSV     |
-                \SplFileObject::READ_AHEAD   |
-                \SplFileObject::SKIP_EMPTY   |
-                \SplFileObject::DROP_NEW_LINE
-            );
+            $csv = Storage::get('syukujitsu.csv');
+            $file = explode("\n", $csv);
+            $lines = mb_convert_encoding($file, 'UTF-8', 'SJIS'); 
 
-            $holidays = [];
-            foreach($file as $line){
-                $lines = mb_convert_encoding($line, 'UTF-8', 'SJIS');
-                $holidays[$lines[0]] = $lines[1]; //(日付=>祝日)の連想配列
-            }
-            // var_dump($holidays);
 
-            } catch (Exception $e) {
-            echo $e->getMessage();
+            foreach($lines as $line){
+              $holiday = explode(",", $line);
+              if(!empty($holiday[0]) && !empty($holiday[1])){
+                $holidays[$holiday[0]] = $holiday[1];  //(日付=>祝日)の連想配列
+              }
             }
+
+        } catch (Exception $e) {
+            return view('welcome');
+        }
 
         return view('calendars.calendar', ['year' => $year, 'month' => $month, 'last_month' => $last_month, 'last_month_year' => $last_month_year, 'next_month' => $next_month, 'next_month_year' => $next_month_year,
         'weeks' => $weeks, 'first_weekday' => $first_weekday, 'final_weekday' => $final_weekday, 'holidays' => $holidays, 'last_day' => $last_day, 'today' => $today]);
