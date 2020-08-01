@@ -42,12 +42,13 @@
           @endif
 
           <!-- 日付繰り返し -->
-          @for($i=1; $i<=$last_day; $i++)
-          @php
-            $day_of_week = date("w", mktime(0,0,0, $month, $i, $year));  //<!-- $i日の曜日 -->
-            $date = date('Y/n/j', mktime(0,0,0, $month, $i, $year));  //<!-- $year/$month/$i -->
-            $date_db = date('Y-m-d', mktime(0,0,0, $month, $i, $year));  //<!-- $year-$month-$i -->
-          @endphp
+          @for($i=1; $i<=$final_day; $i++)
+            @php
+              $carbon = \Carbon\Carbon::create($year, $month, $i, 0,0,0);
+              $day_of_week = $carbon->copy()->dayOfWeek;  //<!-- $i日の曜日 -->
+              $date = $carbon->copy()->format('Y/n/j');  //<!-- $year/$month/$i -->
+              $date_db = $carbon->copy()->format('Y-m-d');  //<!--$year-$month-$i -->
+            @endphp
 
             <!-- 週始め -->
             @if($day_of_week == 0)
@@ -87,7 +88,7 @@
               @endif
 
               <!-- //最後の空白 -->
-              @if($i == $last_day)
+              @if($i == $final_day)
                 @for($x=1; $x<=(6-$final_weekday); $x++)
                   <td></td>  
                 @endfor

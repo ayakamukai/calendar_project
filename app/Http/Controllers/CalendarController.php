@@ -17,24 +17,26 @@ class CalendarController extends Controller
         if($request->query('year')){
             $year = $request->query('year');
         }else{
-            $year = date('Y');
+            $year = Carbon::now()->year;
         }
         if($request->query('month')){
             $month = $request->query('month');
         }else{
-            $month = date('n');
+            $month = Carbon::now()->month;
         }
 
         $weeks = ['日','月','火','水','木','金','土'];
-        $today = Carbon::today()->format('Y-m-d'); //今日
-        $first_weekday = Carbon::create($year, $month, 1, 0,0,0)->format('w');  //初日の曜日
-        $final_weekday = Carbon::create($year, $month+1, 0, 0,0,0)->format('w');  //月末日の曜日
-        $last_day = Carbon::create($year, $month+1, 0, 0,0,0)->format('j'); //任意の月の末日
+        $carbon = Carbon::create($year, $month, 1, 0,0,0);
+        
+        $today = $carbon->today()->toDateString(); //今日
+        $first_weekday = $carbon->copy()->firstOfMonth()->dayOfWeek;  //初日の曜日
+        $final_weekday = $carbon->copy()->lastOfMonth()->dayOfWeek;  //月末日の曜日
+        $final_day = $carbon->copy()->lastOfMonth()->format('j'); //任意の月の末日
 
-        $last_month = Carbon::create($year, $month-1, 1, 0,0,0)->format('n');
-        $next_month = Carbon::create($year, $month+1, 1, 0,0,0)->format('n');
-        $last_month_year = Carbon::create($year, $month-1, 1, 0,0,0)->format('Y');
-        $next_month_year = Carbon::create($year, $month+1, 1, 0,0,0)->format('Y');
+        $last_month = $carbon->copy()->subMonth()->format('n');;
+        $last_month_year = $carbon->copy()->subMonth()->format('Y');;
+        $next_month = $carbon->copy()->addMonth()->format('n');;
+        $next_month_year =  $carbon->copy()->addMonth()->format('Y');;
 
         $holidays = [];
         try {
@@ -42,7 +44,6 @@ class CalendarController extends Controller
             $csv = Storage::get('syukujitsu.csv');
             $file = explode("\n", $csv);
             $lines = mb_convert_encoding($file, 'UTF-8', 'SJIS'); 
-
 
             foreach($lines as $line){
               $holiday = explode(",", $line);
@@ -56,6 +57,6 @@ class CalendarController extends Controller
         }
 
         return view('calendars.calendar', ['year' => $year, 'month' => $month, 'last_month' => $last_month, 'last_month_year' => $last_month_year, 'next_month' => $next_month, 'next_month_year' => $next_month_year,
-        'weeks' => $weeks, 'first_weekday' => $first_weekday, 'final_weekday' => $final_weekday, 'holidays' => $holidays, 'last_day' => $last_day, 'today' => $today]);
+        'weeks' => $weeks, 'first_weekday' => $first_weekday, 'final_weekday' => $final_weekday, 'holidays' => $holidays, 'final_day' => $final_day, 'today' => $today]);
     }
 }
