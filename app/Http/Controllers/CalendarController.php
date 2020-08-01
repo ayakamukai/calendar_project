@@ -53,7 +53,7 @@ class CalendarController extends Controller
             }
 
         } catch (Exception $e) {
-            return view('welcome');
+            echo "※祝日データが取得できませんでした";
         }
 
         return view('calendars.calendar', ['year' => $year, 'month' => $month, 'last_month' => $last_month, 'last_month_year' => $last_month_year, 'next_month' => $next_month, 'next_month_year' => $next_month_year,
