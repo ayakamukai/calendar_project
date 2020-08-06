@@ -11,28 +11,15 @@
       {{ $date_array[0] }}年{{ $date_array[1] }}月{{ $date_array[2] }}日のスケジュール
     </h3>
     <div class="my-2">
-      <a href="{{ route('create', ['schedule' => $date_db]) }}">登録</a>
+      <a href="{{ route('create', ['schedule' => $date]) }}">登録</a>
     </div>
 
-<?php
-session_start();
-//登録メッセージ表示
-if(!empty($_SESSION['update'])){
-echo "<div class='alert alert-success'>".$_SESSION['update']."</div>";
-}
-if(!empty($_SESSION['register'])){
-echo "<div class='alert alert-success'>".$_SESSION['register']."</div>";
-}
-//削除メッセージ表示
-if(!empty($_SESSION['delete'])){
-echo "<div class='alert alert-success'>".$_SESSION['delete']."</div>";
-}
-session_destroy();
-?>
+    @if (session('status'))
+        <div class="alert alert-success">
+          {{ session('status') }}
+        </div>
+    @endif
 
-    @if(empty($results))
-      <h5 style="line-height:500%;">予定がありません</h5>
-    @else
       <table class="table table-bordered text-center">
         <tr>
           <th>時間</th>
@@ -40,20 +27,21 @@ session_destroy();
           <th></th>
           <th></th>
         </tr>
-      @foreach($results as $result)
-        {{ $result->id }}
-        {{ $result->date }}
-        {{ $result->title }}
-        {{ $result->plan }}
         <tr>
-          <td>{{ $result->time }}</td>
+        @foreach($results as $result)
+          <td>{{ $result->time->format('G:i') }}</td>
           <td align="left">{{ $result->title }}</td>
           <td><a href="{{ route('edit', ['id' => $result->id]) }}">編集</a></td>
           <td><a href="{{ route('delete', ['id' => $result->id]) }}">削除</a></td>
-      @endforeach
         </tr>
-    </table>
-    @endif
+        @endforeach
+     </table>
+
+    <div class="error text-alart">
+      @error('ID')
+        <strong class="text-danger">※{{ $message }}</strong>
+      @enderror
+    </div>  
 
 
     <div class="my-2">

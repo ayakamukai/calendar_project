@@ -46,8 +46,7 @@
             @php
               $carbon = \Carbon\Carbon::create($year, $month, $i, 0,0,0);
               $day_of_week = $carbon->copy()->dayOfWeek;  //<!-- $i日の曜日 -->
-              $date = $carbon->copy()->format('Y/n/j');  //<!-- $year/$month/$i -->
-              $date_db = $carbon->copy()->format('Y-m-d');  //<!--$year-$month-$i -->
+              $date = $carbon->copy()->format('Y-n-j');  //<!-- $year-$month-$i -->
             @endphp
 
             <!-- 週始め -->
@@ -65,17 +64,14 @@
                 $css_class = "weekday";
               }
 
-              if($date_db == $today){
+              if($date == $today){
                 $css_class = $css_class." today";
               }
 
+              //<!-- if (in_array($date, $month_plans)){
+              //  $css_class = $css_class." has_plan";
+              //} -->
             @endphp
-            
-              <!--             $css_class = $css_class." has_plan"; -->
-
-            <!-- @foreach ($plan_date_dbs as $plan_date_db)      
-              {{ $plan_date_db->date }}
-            @endforeach -->
 
               <!-- 祝日名 -->
               @if(isset($holidays[$date]))
