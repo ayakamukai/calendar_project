@@ -26,14 +26,16 @@ class CalendarController extends Controller
             $month = Carbon::now()->month;
         }
 
+        //一か月の予定
         $start = $year.'-'.$month.'-1';
         $end = $year.'-'.$month.'-31';
-        $plan_date_dbs = Schedule::whereBetween('date', [$start, $end])->get();        
+        $results = Schedule::whereBetween('date', [$start, $end])->get();
+        // $month_plans = $results->date->format('Y-n-j');
 
         $weeks = ['日','月','火','水','木','金','土'];
         $carbon = Carbon::create($year, $month, 1, 0,0,0);
         
-        $today = $carbon->today()->toDateString(); //今日
+        $today = $carbon->today()->format('Y-n-j'); //今日
         $first_weekday = $carbon->copy()->firstOfMonth()->dayOfWeek;  //初日の曜日
         $final_weekday = $carbon->copy()->lastOfMonth()->dayOfWeek;  //月末日の曜日
         $final_day = $carbon->copy()->lastOfMonth()->format('j'); //任意の月の末日
@@ -47,8 +49,9 @@ class CalendarController extends Controller
         try {
             //ファイルの読み込み
             $csv = Storage::get('syukujitsu.csv');
-            $file = explode("\n", $csv);
-            $lines = mb_convert_encoding($file, 'UTF-8', 'SJIS'); 
+            $array = explode("\n", $csv);
+            $file = mb_convert_encoding($array, 'UTF-8', 'SJIS'); 
+            $lines = str_replace("/", "-", $file);
 
             foreach($lines as $line){
               $holiday = explode(",", $line);
@@ -62,83 +65,92 @@ class CalendarController extends Controller
         }
 
         return view('calendars.calendar', ['year' => $year, 'month' => $month, 'last_month' => $last_month, 'last_month_year' => $last_month_year, 'next_month' => $next_month, 'next_month_year' => $next_month_year,
-        'weeks' => $weeks, 'first_weekday' => $first_weekday, 'final_weekday' => $final_weekday, 'holidays' => $holidays, 'final_day' => $final_day, 'today' => $today, 'plan_date_dbs' => $plan_date_dbs]);
+        'weeks' => $weeks, 'first_weekday' => $first_weekday, 'final_weekday' => $final_weekday, 'holidays' => $holidays, 'final_day' => $final_day, 'today' => $today]);
     }
 
     //スケジュール画面
     public function show(CalendarRequest $request)
     {
 
-        $date_db = str_replace("/", "-", $request->query('schedule'));
-        $date_array = explode('-', $date_db);
-
-        var_dump($date_array);
-        $results = Schedule::where('date', $date_db)->orderBy('time','asc')->get();
-        return view('calendars.schedule', ['results' => $results, 'date_array' => $date_array, 'date_db' => $date_db]);
-    
-    }
-
-    //登録
-    public function create(CalendarRequest $request)
-    {
-
         $date = $request->query('schedule');
         $date_array = explode('-', $date);
-        var_dump($date_array);
+        $results = Schedule::where('date', $date)->orderBy('time','asc')->get();
+
+       return view('calendars.schedule', ['results' => $results, 'date_array' => $date_array, 'date' => $date]);
+    }
+
+    //登録画面
+    public function create(CalendarRequest $request)
+    {
+        $date = $request->query('schedule');
+        $date_array = explode('-', $date);
 
         return view('calendars.create', ['date_array' => $date_array, 'date' => $date]);
-    
     }
 
     //登録処理
     public function store(CalendarRequest $request)
     {
-
-        // DB登録
+        //DB登録
         $results = new Schedule;
         $results->title = $request->title;
         $results->plan = $request->plan;
         $results->time = $request->hour.":".$request->minute;
         $results->date = $request->date;
         $results->save();
+        $date = $results->date->format('Y-n-j');
+        $date_array = explode('-', $date);
 
-        return redirect()->route('calendar');
+        return redirect()->route('schedule', ['schedule' => $date, 'date_array' => $date_array])->with('status', '予定を登録しました！');
     }
 
     //編集
-    public function edit($id)
+    public function edit(int $id)
     {
-        $results = Schedule::find($id);
-        var_dump($results->date);
+        try {
+            $result = Schedule::findOrFail($id);
+            $date = $result->date->format('Y-n-j');
+            $date_array = explode('-', $date);
+            $hour = $result->time->format('G');
+            $minute = $result->time->format('i');
 
-        return view('calendars.edit', ['results' => $results]);
+        } catch (ModelNotFoundException $e) {
+            return redirect()->route('schedule', ['schedule' => $date])->withErrors(['ID' => '指定した予定が存在しません']);
+        }
+
+          return view('calendars.edit', ['result' => $result, 'date' => $date, 'date_array' => $date_array, 'hour' => $hour, 'minute' => $minute]);
     }
 
     //更新処理
     public function update(CalendarRequest $request, $id)
     {
-        // DBに更新
-        //$results = User::find($id);
-        //$results->fill($request->all());
-        //$results->save();
+        try {
+            $result = Schedule::findOrFail($id);
+            $date = $result->date->format('Y-n-j');
 
-        $results = Schedule::find($id);
-        $results->title = $request->title;
-        $results->plan = $request->plan;
-        $results->time = $request->time;
-        $results->date = $request->date;
-        $results->save();
-        return redirect()->route('schedule');
+        } catch (ModelNotFoundException $e) {
+            return redirect()->route('schedule', ['schedule' => $date])->withErrors(['ID' => '指定した予定が存在しません']);
+        }
+        $result->title = $request->title;
+        $result->plan = $request->plan;
+        $result->time = $request->hour.":".$request->minute;
+        $result->date = $request->date;
+        $result->save();
+
+        return redirect()->route('schedule', ['schedule' => $date])->with('status', '予定を更新しました！');
     }
 
     // ユーザー削除処理
-    public function delete($id)
+    public function delete(Request $request, int $id)
     {
-        $results = Schedule::find($id);
-        $results->delete();
+        try {
+            $result = Schedule::findOrFail($id);
+            $date = $result->date->format('Y-n-j');
 
-        return redirect()->route('schedule');
-    }
-
-
+          } catch (ModelNotFoundException $e) {
+            return redirect()->route('schedule', ['schedule' => $date])->withErrors(['ID' => '指定した予定が存在しません']);
+          }
+            $result->delete();
+          return redirect()->route('schedule', ['schedule' => $date])->with('status', '予定を消去しました！');
+        }
 }
