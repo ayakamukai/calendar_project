@@ -24,27 +24,12 @@ class CalendarRequest extends FormRequest
     public function rules()
     {
         return [
-            'title' => 'max:20',
-            // 'title' => 'required',
+            'title' => 'max:20|required',
             'plan' => 'max:100',
             'year' => 'regex:/^[0-9]{4}$/',
             'month' => 'regex:/^[0-9]{1,2}$/',
-            'date' => 'date',
         ];
     }
-    // public function getValidatorInstance()
-    // {
-    //     if ($this->query('year') && $this->query('month'))
-    //     {
-    //         $dateFormat = [$this->query('year'), $this->query('month'), 1];
-    //         $checkDate = implode("-", $dateFormat);
-    //         $this->merge([
-    //             'date' => $checkDate
-    //         ]);
-    //     }
-
-    //     return parent::getValidatorInstance();
-    // }
 
     public function messages()
     {
@@ -52,7 +37,6 @@ class CalendarRequest extends FormRequest
         "title.required" => "タイトルを入力してください",
         "title.max" => "タイトルは20文字以内で入力してください",
         "plan.max" => "内容は100文字以内で入力してください"
-
         ];
       }
 }

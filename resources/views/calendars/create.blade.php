@@ -64,7 +64,7 @@
 
           <div class="form-group row">
             <div class="col-9 mx-auto">
-              <textarea class="form-control @if($errors->has('title')) is-invalid @endif" name="plan" rows="5">{{ old('plan') }}</textarea>
+              <textarea class="form-control @if($errors->has('plan')) is-invalid @endif" name="plan" rows="5">{{ old('plan') }}</textarea>
               @if ($errors->has('plan'))
                 <div class="invalid-feedback">
                   {{ $errors->first('plan') }}
