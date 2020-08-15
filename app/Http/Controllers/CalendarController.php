@@ -140,18 +140,17 @@ class CalendarController extends Controller
     }
 
     //編集
-    public function edit(int $id)
+    public function edit(Request $request,  int $id)
     {
         try {
             $result = Schedule::findOrFail($id);
-            $date = $result->date->format('Y-n-j');
-            $date_array = explode('-', $date);
-            $hour = $result->time->format('G');
-            $minute = $result->time->format('i');
-
         } catch (ModelNotFoundException $e) {
-            return redirect()->route('schedule', ['schedule' => $date])->withErrors(['ID' => '指定した予定が存在しません']);
+            return redirect()->route('calendar')->withErrors(['ID' => '指定した予定が存在しません']);
         }
+        $date = $result->date->format('Y-n-j');
+        $date_array = explode('-', $date);
+        $hour = $result->time->format('G');
+        $minute = $result->time->format('i');
 
           return view('calendars.edit', ['result' => $result, 'date' => $date, 'date_array' => $date_array, 'hour' => $hour, 'minute' => $minute]);
     }
@@ -161,11 +160,10 @@ class CalendarController extends Controller
     {
         try {
             $result = Schedule::findOrFail($id);
-            $date = $result->date->format('Y-n-j');
-
         } catch (ModelNotFoundException $e) {
-            return redirect()->route('schedule', ['schedule' => $date])->withErrors(['ID' => '指定した予定が存在しません']);
+            return redirect()->route('calendar')->withErrors(['ID' => '指定した予定が存在しません']);
         }
+        $date = $result->date->format('Y-n-j');
         $result->title = $request->title;
         $result->plan = $request->plan;
         $result->time = $request->hour.":".$request->minute;
@@ -181,9 +179,8 @@ class CalendarController extends Controller
         try {
             $result = Schedule::findOrFail($id);
             $date = $result->date->format('Y-n-j');
-
-          } catch (ModelNotFoundException $e) {
-            return redirect()->route('schedule', ['schedule' => $date])->withErrors(['ID' => '指定した予定が存在しません']);
+        } catch (ModelNotFoundException $e) {
+            return redirect()->route('calendar')->withErrors(['ID' => '指定した予定が存在しません']);
           }
             $result->delete();
           return redirect()->route('schedule', ['schedule' => $date])->with('status', '予定を消去しました！');

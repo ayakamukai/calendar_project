@@ -20,6 +20,8 @@
         </div>
     @endif
 
+
+    @if(count($results) > 0 )
       <table class="table table-bordered text-center">
         <tr>
           <th>時間</th>
@@ -36,13 +38,9 @@
         </tr>
         @endforeach
      </table>
-
-    <div class="error text-alart">
-      @error('ID')
-        <strong class="text-danger">※{{ $message }}</strong>
-      @enderror
-    </div>  
-
+    @else
+    <h5 style="line-height:500%;">予定がありません</h5>
+    @endif
 
     <div class="my-2">
       <a href="{{ route('calendar', ['month' => $date_array[1], 'year'=> $date_array[0]]) }}">戻る</a>

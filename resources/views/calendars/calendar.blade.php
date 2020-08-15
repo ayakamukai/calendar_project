@@ -8,6 +8,13 @@
     <div class="my-2 p-3 bg-white">
       <h3>カレンダー</h3>
       <h3 class="text-center">{{ $year }}年{{ $month }}月</h3>
+
+        <div class="error text-alart">
+          @error('ID')
+            <strong class="text-danger">※{{ $message }}</strong>
+          @enderror
+        </div>  
+
           <div class="row">
             <div class="col left">
               <a href="{{ route('calendar', ['month' => $last_month, 'year' => $last_month_year]) }}">＜＜{{ $last_month }}月</a>
