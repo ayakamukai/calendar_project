@@ -75,10 +75,12 @@
                 $css_class = $css_class." today";
               }
 
-              //<!-- if (in_array($date, $month_plans)){
-              //  $css_class = $css_class." has_plan";
-              //} -->
+              if (in_array($date, $month_plans)) {
+                $css_class = $css_class." has_plan";
+              }
             @endphp
+
+
 
               <!-- 祝日名 -->
               @if(isset($holidays[$date]))
