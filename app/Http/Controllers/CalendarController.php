@@ -3,34 +3,42 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Exception;
 use App\Http\Requests\CalendarRequest;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use App\Schedule;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 
 class CalendarController extends Controller
 {
     //カレンダー画面
-    public function index(CalendarRequest $request)
+    public function index(Request $request)
     {
         // 任意の年月
-        if($request->query('year')){
+        if($request->query('year') && preg_match('/^[0-9]{4}$/', $request->query('year'))){
             $year = $request->query('year');
         }else{
             $year = Carbon::now()->year;
         }
-        if($request->query('month')){
+
+        if($request->query('month') && preg_match('/^[0-9]{1,2}$/', $request->query('month'))){
             $month = $request->query('month');
         }else{
             $month = Carbon::now()->month;
         }
+        
+        //日付チェック
+        if(!(checkdate($month, 1, $year))){
+            return redirect()->route('calendar');
+        }
 
-        //一か月の予定
-        $start = $year.'-'.$month.'-1';
-        $end = $year.'-'.$month.'-31';
-        $results = Schedule::whereBetween('date', [$start, $end])->get();
-        // $month_plans = $results->date->format('Y-n-j');
+        //予定取得
+        $items = Schedule::all();
+        $month_plans = [];
+        foreach($items as $item){
+            $month_plans[] = $item->date->format('Y-n-j');
+        }
 
         $weeks = ['日','月','火','水','木','金','土'];
         $carbon = Carbon::create($year, $month, 1, 0,0,0);
@@ -65,25 +73,52 @@ class CalendarController extends Controller
         }
 
         return view('calendars.calendar', ['year' => $year, 'month' => $month, 'last_month' => $last_month, 'last_month_year' => $last_month_year, 'next_month' => $next_month, 'next_month_year' => $next_month_year,
-        'weeks' => $weeks, 'first_weekday' => $first_weekday, 'final_weekday' => $final_weekday, 'holidays' => $holidays, 'final_day' => $final_day, 'today' => $today]);
+        'weeks' => $weeks, 'first_weekday' => $first_weekday, 'final_weekday' => $final_weekday, 'holidays' => $holidays, 'final_day' => $final_day, 'today' => $today, 'month_plans' => $month_plans]);
     }
 
     //スケジュール画面
-    public function show(CalendarRequest $request)
+    public function show(Request $request)
     {
 
         $date = $request->query('schedule');
         $date_array = explode('-', $date);
+
+        //日付チェック
+        if(count(array_filter($date_array)) == 3){
+          $year = $date_array[0];
+          $month = $date_array[1];
+          $day = $date_array[2];
+
+          if(!(is_numeric($year)) || !(is_numeric($month)) || !(is_numeric($day)) || !(checkdate($month, $day, $year))){
+            return redirect()->route('calendar');
+          }
+        }else{
+            return redirect()->route('calendar');
+        }
+
         $results = Schedule::where('date', $date)->orderBy('time','asc')->get();
 
        return view('calendars.schedule', ['results' => $results, 'date_array' => $date_array, 'date' => $date]);
     }
 
     //登録画面
-    public function create(CalendarRequest $request)
+    public function create(Request $request)
     {
         $date = $request->query('schedule');
         $date_array = explode('-', $date);
+
+        //日付チェック
+        if(count(array_filter($date_array)) == 3){
+          $year = $date_array[0];
+          $month = $date_array[1];
+          $day = $date_array[2];
+  
+          if(!(is_numeric($year)) || !(is_numeric($month)) || !(is_numeric($day)) || !(checkdate($month, $day, $year))){
+            return redirect()->route('calendar');
+          }
+        }else{
+          return redirect()->route('calendar');
+        }  
 
         return view('calendars.create', ['date_array' => $date_array, 'date' => $date]);
     }
