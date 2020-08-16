@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use App\Schedule;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\DB;
 
 class CalendarController extends Controller
 {
@@ -44,7 +43,7 @@ class CalendarController extends Controller
 
         $weeks = ['日','月','火','水','木','金','土'];
         $carbon = Carbon::create($year, $month, 1, 0,0,0);
-        
+
         $today = $carbon->today()->format('Y-n-j'); //今日
         $first_weekday = $carbon->copy()->firstOfMonth()->dayOfWeek;  //初日の曜日
         $final_weekday = $carbon->copy()->lastOfMonth()->dayOfWeek;  //月末日の曜日
@@ -120,7 +119,7 @@ class CalendarController extends Controller
           }
         }else{
           return redirect()->route('calendar');
-        }  
+        }
 
         return view('calendars.create', ['date_array' => $date_array, 'date' => $date]);
     }
@@ -162,7 +161,7 @@ class CalendarController extends Controller
     {
         try {
             $result = Schedule::findOrFail($id);
-        } catch (ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {   
             return redirect()->route('calendar')->withErrors(['ID' => '指定した予定が存在しません']);
         }
         $date = $result->date->format('Y-n-j');
@@ -175,7 +174,7 @@ class CalendarController extends Controller
         return redirect()->route('schedule', ['schedule' => $date])->with('status', '予定を更新しました！');
     }
 
-    // ユーザー削除処理
+    // 削除処理
     public function delete(Request $request, int $id)
     {
         try {

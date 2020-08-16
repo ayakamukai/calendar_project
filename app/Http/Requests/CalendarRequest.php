@@ -25,9 +25,8 @@ class CalendarRequest extends FormRequest
     {
         return [
             'title' => 'max:20|required',
-            'plan' => 'max:100',
-            'year' => 'regex:/^[0-9]{4}$/',
-            'month' => 'regex:/^[0-9]{1,2}$/',
+            'plan' => 'max:30|required',
+            'time' => 'date_format:G:i'
         ];
     }
 
@@ -36,7 +35,8 @@ class CalendarRequest extends FormRequest
         return [
         "title.required" => "タイトルを入力してください",
         "title.max" => "タイトルは20文字以内で入力してください",
-        "plan.max" => "内容は100文字以内で入力してください"
+        "plan.required" => "内容を入力してください",
+        "plan.max" => "内容は30文字以内で入力してください"
         ];
       }
 }
