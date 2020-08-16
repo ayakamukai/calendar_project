@@ -20,7 +20,6 @@
         </div>
     @endif
 
-
     @if(count($results) > 0 )
       <table class="table table-bordered text-center">
         <tr>
@@ -34,16 +33,25 @@
           <td>{{ $result->time->format('G:i') }}</td>
           <td align="left">{{ $result->title }}</td>
           <td><a href="{{ route('edit', ['id' => $result->id]) }}">編集</a></td>
-          <td><a href="{{ route('delete', ['id' => $result->id]) }}">削除</a></td>
+          <td><a href="{{ route('delete', ['id' => $result->id]) }}" class="delete">削除</a></td>
         </tr>
         @endforeach
      </table>
     @else
-    <h5 style="line-height:500%;">予定がありません</h5>
+      <h5 style="line-height:500%;">予定がありません</h5>
     @endif
 
     <div class="my-2">
       <a href="{{ route('calendar', ['month' => $date_array[1], 'year'=> $date_array[0]]) }}">戻る</a>
     </div>
+
+<script>
+//キャンセルの時の処理
+$('.delete').click(function(){
+    if(!confirm('本当に削除しますか？')){
+        return false;
+    }
+});
+</script>
 
 @endsection
