@@ -27,14 +27,16 @@ class CalendarController extends Controller
         }else{
             $month = Carbon::now()->month;
         }
-        
+
         //日付チェック
         if(!(checkdate($month, 1, $year))){
             return redirect()->route('calendar');
         }
 
-        //予定取得
-        $items = Schedule::all();
+        //一か月毎の予定取得
+        $start = $year.'-'.$month.'-1';
+        $end = $year.'-'.$month.'-31';
+        $items = Schedule::whereBetween('date', [$start, $end])->get();
         $month_plans = [];
         foreach($items as $item){
             $month_plans[] = $item->date->format('Y-n-j');
