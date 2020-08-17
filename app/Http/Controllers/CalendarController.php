@@ -136,7 +136,7 @@ class CalendarController extends Controller
         $results->save();
         $date = $results->date->format('Y-n-j');
         $date_array = explode('-', $date);
-
+        
         return redirect()->route('schedule', ['schedule' => $date, 'date_array' => $date_array])->with('status', '予定を登録しました！');
     }
 

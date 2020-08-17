@@ -24,7 +24,7 @@
           <div class="form-group row">
             <label for="time" class="col-4 col-form-label">時間</label>
               <div class="col-2">
-                <select class="form-control" name="hour">
+                <select class="form-control @if($errors->has('date_time')) is-invalid @endif" name="hour">
                   @for($i=0; $i<=23; $i++)
                     <option value={{ $i }}
                       @if(old('hour', $hour) == $i)
@@ -36,7 +36,7 @@
               </div>
               <span>：</span>
               <div class="col-2">
-                <select class="form-control" name="minute">
+                <select class="form-control @if($errors->has('date_time')) is-invalid @endif" name="minute">
                   @for($i=0; $i<=59; $i++)
                     @php
                       $y = str_pad($i, 2, 0, STR_PAD_LEFT);
@@ -48,7 +48,12 @@
                       >{{ $y }}</option>
                    @endfor
                 </select>
-              </div>  
+              </div>
+              @if ($errors->has('date_time'))
+              <div class="invalid-feedback">
+                {{ $errors->first('date_time') }}
+              </div>
+              @endif
           </div>
 
           <div class="form-group row">
