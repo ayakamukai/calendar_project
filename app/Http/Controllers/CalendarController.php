@@ -79,15 +79,11 @@ class CalendarController extends Controller
     public function show(Request $request)
     {
 
-        $date = $request->query('schedule');
-        $date_array = explode('-', $date);
+        $date = $request->query('schedule'); //ex.)2020-9-1
+        list($year, $month, $day) = explode('-', $date);
 
         //日付チェック
-        if(count(array_filter($date_array)) == 3){
-          $year = $date_array[0];
-          $month = $date_array[1];
-          $day = $date_array[2];
-
+        if(isset($year, $month, $day)){
           if(!(is_numeric($year)) || !(is_numeric($month)) || !(is_numeric($day)) || !(checkdate($month, $day, $year))){
             return redirect()->route('calendar');
           }
@@ -97,29 +93,25 @@ class CalendarController extends Controller
 
         $results = Schedule::where('date', $date)->orderBy('time','asc')->get();
 
-       return view('calendars.schedule', ['results' => $results, 'date_array' => $date_array, 'date' => $date]);
+       return view('calendars.schedule', ['results' => $results, 'date' => $date, 'year' => $year, 'month' => $month, 'day' => $day]);
     }
 
     //登録画面
     public function create(Request $request)
     {
-        $date = $request->query('schedule');
-        $date_array = explode('-', $date);
+        $date = $request->query('schedule'); //ex.)2020-9-1
+        list($year, $month, $day) = explode('-', $date);
 
         //日付チェック
-        if(count(array_filter($date_array)) == 3){
-          $year = $date_array[0];
-          $month = $date_array[1];
-          $day = $date_array[2];
-  
-          if(!(is_numeric($year)) || !(is_numeric($month)) || !(is_numeric($day)) || !(checkdate($month, $day, $year))){
-            return redirect()->route('calendar');
+        if(isset($year, $month, $day)){
+            if(!(is_numeric($year)) || !(is_numeric($month)) || !(is_numeric($day)) || !(checkdate($month, $day, $year))){
+              return redirect()->route('calendar');
+            }
+          }else{
+              return redirect()->route('calendar');
           }
-        }else{
-          return redirect()->route('calendar');
-        }
 
-        return view('calendars.create', ['date_array' => $date_array, 'date' => $date]);
+        return view('calendars.create', ['date' => $date, 'year' => $year, 'month' => $month, 'day' => $day]);
     }
 
     //登録処理
@@ -130,12 +122,13 @@ class CalendarController extends Controller
         $results->title = $request->title;
         $results->plan = $request->plan;
         $results->time = $request->hour.":".$request->minute;
-        $results->date = $request->date;
+        $results->date = $request->date; //ex.)2020-9-1 = クエリストリング
         $results->save();
-        $date = $results->date->format('Y-n-j');
-        $date_array = explode('-', $date);
-        
-        return redirect()->route('schedule', ['schedule' => $date, 'date_array' => $date_array])->with('status', '予定を登録しました！');
+
+        $date = $results->date->format('Y-n-j'); //Carbonからフォーマット調整
+        list($year, $month, $day) = explode('-', $date);
+
+        return redirect()->route('schedule', ['schedule' => $date, 'year' => $year, 'month' => $month, 'day' => $day])->with('status', '予定を登録しました！');
     }
 
     //編集
@@ -146,12 +139,14 @@ class CalendarController extends Controller
         } catch (ModelNotFoundException $e) {
             return redirect()->route('calendar')->withErrors(['ID' => '指定した予定が存在しません']);
         }
+
+        //日時のフォーマット調整
         $date = $result->date->format('Y-n-j');
-        $date_array = explode('-', $date);
+        list($year, $month, $day) = explode('-', $date);
         $hour = $result->time->format('G');
         $minute = $result->time->format('i');
 
-          return view('calendars.edit', ['result' => $result, 'date' => $date, 'date_array' => $date_array, 'hour' => $hour, 'minute' => $minute]);
+          return view('calendars.edit', ['result' => $result, 'date' => $date, 'year' => $year, 'month' => $month, 'day' => $day, 'hour' => $hour, 'minute' => $minute]);
     }
 
     //更新処理
@@ -163,6 +158,8 @@ class CalendarController extends Controller
             return redirect()->route('calendar')->withErrors(['ID' => '指定した予定が存在しません']);
         }
         $date = $result->date->format('Y-n-j');
+        
+        //DB更新
         $result->title = $request->title;
         $result->plan = $request->plan;
         $result->time = $request->hour.":".$request->minute;
@@ -177,10 +174,10 @@ class CalendarController extends Controller
     {
         try {
             $result = Schedule::findOrFail($id);
-            $date = $result->date->format('Y-n-j');
         } catch (ModelNotFoundException $e) {
             return redirect()->route('calendar')->withErrors(['ID' => '指定した予定が存在しません']);
           }
+            $date = $result->date->format('Y-n-j');
             $result->delete();
           return redirect()->route('schedule', ['schedule' => $date])->with('status', '予定を消去しました！');
         }

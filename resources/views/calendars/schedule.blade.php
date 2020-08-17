@@ -8,7 +8,7 @@
   <h3>スケジュール</h3>
   <div class="text-center">
     <h3 class="text-center">
-      {{ $date_array[0] }}年{{ $date_array[1] }}月{{ $date_array[2] }}日のスケジュール
+      {{ $year }}年{{ $month }}月{{ $day }}日のスケジュール
     </h3>
     <div class="my-2">
       <a href="{{ route('create', ['schedule' => $date]) }}">登録</a>
@@ -42,7 +42,7 @@
     @endif
 
     <div class="my-2">
-      <a href="{{ route('calendar', ['month' => $date_array[1], 'year'=> $date_array[0]]) }}">戻る</a>
+      <a href="{{ route('calendar', ['month' => $month, 'year'=> $year]) }}">戻る</a>
     </div>
 
 <script>

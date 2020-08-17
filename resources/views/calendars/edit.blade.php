@@ -15,7 +15,7 @@
     <h3>スケジュール編集</h3>
     <div class="text-center">
         <h3 class="text-center">
-          {{ $date_array[0] }}年{{ $date_array[1] }}月{{ $date_array[2] }}日のスケジュール
+        {{ $year }}年{{ $month }}月{{ $day }}日のスケジュール
         </h3>
 
         <form action="{{ route('update', $result->id) }}" method="post">
@@ -79,7 +79,7 @@
             </div>
           </div>
 
-          <input type="hidden" class="form-control" name="date" value="{{ $date_array[0] }}-{{ $date_array[1] }}-{{ $date_array[2] }}">
+          <input type="hidden" class="form-control" name="date" value="{{ $date }}">
           
           <button class="btn btn-primary col-2" type="submit">更新する</button>
         </form>
