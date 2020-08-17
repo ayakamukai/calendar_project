@@ -32,15 +32,6 @@ class CalendarController extends Controller
             return redirect()->route('calendar');
         }
 
-        //一か月毎の予定取得
-        $start = $year.'-'.$month.'-1';
-        $end = $year.'-'.$month.'-31';
-        $items = Schedule::whereBetween('date', [$start, $end])->get();
-        $month_plans = [];
-        foreach($items as $item){
-            $month_plans[] = $item->date->format('Y-n-j');
-        }
-
         $weeks = ['日','月','火','水','木','金','土'];
         $carbon = Carbon::create($year, $month, 1, 0,0,0);
 
@@ -53,6 +44,13 @@ class CalendarController extends Controller
         $last_month_year = $carbon->copy()->subMonth()->format('Y');;
         $next_month = $carbon->copy()->addMonth()->format('n');;
         $next_month_year =  $carbon->copy()->addMonth()->format('Y');;
+
+        //一か月毎の予定取得
+        $items = Schedule::whereBetween('date', [$carbon->copy()->firstOfMonth(), $carbon->copy()->lastOfMonth()])->get();
+        $month_plans = [];
+        foreach($items as $item){
+            $month_plans[] = $item->date->format('Y-n-j'); //ex.)2020-9-1
+        }
 
         $holidays = [];
         try {
