@@ -8,15 +8,22 @@
     <div class="my-2 p-3 bg-white">
       <h3>カレンダー</h3>
       <h3 class="text-center">{{ $year }}年{{ $month }}月</h3>
+
+        <div class="error text-alart">
+          @error('ID')
+            <strong class="text-danger">※{{ $message }}</strong>
+          @enderror
+        </div>  
+
           <div class="row">
             <div class="col left">
-              <a href={{ route('calendar', ['month' => $last_month, 'year' => $last_month_year]) }}>＜＜{{ $last_month }}月</a>
+              <a href="{{ route('calendar', ['month' => $last_month, 'year' => $last_month_year]) }}">＜＜{{ $last_month }}月</a>
             </div>
             <div class="col center">
               <a href="/">今月</a>
             </div>
             <div class="col right">
-              <a href={{ route('calendar', ['month' => $next_month, 'year' => $next_month_year]) }}>{{ $next_month }}月＞＞</a>
+              <a href="{{ route('calendar', ['month' => $next_month, 'year' => $next_month_year]) }}">{{ $next_month }}月＞＞</a>
             </div>
           </div>
       <table class="table table-bordered text-center">
@@ -46,8 +53,7 @@
             @php
               $carbon = \Carbon\Carbon::create($year, $month, $i, 0,0,0);
               $day_of_week = $carbon->copy()->dayOfWeek;  //<!-- $i日の曜日 -->
-              $date = $carbon->copy()->format('Y/n/j');  //<!-- $year/$month/$i -->
-              $date_db = $carbon->copy()->format('Y-m-d');  //<!--$year-$month-$i -->
+              $date = $carbon->copy()->format('Y-n-j');  //<!-- $year-$month-$i -->
             @endphp
 
             <!-- 週始め -->
@@ -65,21 +71,22 @@
                 $css_class = "weekday";
               }
 
-              if($date_db == $today){
+              if($date == $today){
                 $css_class = $css_class." today";
+              }
+
+              if (in_array($date, $month_plans)) {
+                $css_class = $css_class." has_plan";
               }
             @endphp
 
-              <!-- //予定の有無
-              // if (in_array($date_db, $plan_date_db)) {
-              //   $css_class = $css_class." has_plan";
-              // } -->
+
 
               <!-- 祝日名 -->
               @if(isset($holidays[$date]))
-                <td class="{{ $css_class }} holiday" data-toggle="tooltip" title="{{ $holidays[$date] }}"><a href="">{{ $i }}</a></td>
+                <td class="{{ $css_class }} holiday" data-toggle="tooltip" title="{{ $holidays[$date] }}"><a href="{{ route('schedule', ['schedule' => $date]) }}">{{ $i }}</a></td>
               @else
-                <td class="{{ $css_class }}"><a href="">{{ $i }}</a></td>  <!-- 日終わり -->
+                <td class="{{ $css_class }}"><a href="{{ route('schedule', ['schedule' => $date]) }}">{{ $i }}</a></td>  <!-- 日終わり -->
               @endif
 
               <!-- 週末折り返し -->

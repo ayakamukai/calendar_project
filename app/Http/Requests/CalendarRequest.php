@@ -21,34 +21,35 @@ class CalendarRequest extends FormRequest
      *
      * @return array
      */
+
     public function rules()
     {
         return [
-            'year'=>'regex:/^[0-9]{4}$/',
-            'month'=>'regex:/^[0-9]{1,2}$/',
-            'date'=>'date'
+            'title' => 'max:20|required',
+            'plan' => 'max:1000|required',
+            'date_time' => ['date',
+                            'regex:/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}\s[0-9]{1,2}:[0-9]{2}$/']
         ];
     }
-    public function getValidatorInstance()
-    {
-        if ($this->query('year') && $this->query('month'))
-        {
-            $dateFormat = [$this->query('year'), $this->query('month'), 1];
-            $checkDate = implode("-", $dateFormat);
-            $this->merge([
-                'date' => $checkDate
-            ]);
-        }
 
-        return parent::getValidatorInstance();
+    public function prepareForValidation()
+    {
+        $date_time = ($this->filled(['date', 'hour', 'minute'])) ? $this->date.' '.$this->hour.':'.$this->minute : '';
+        $this->merge([
+           'date_time' => $date_time
+        ]);
+
     }
 
-    public function messages() {
+    public function messages()
+    {
         return [
-        "required" => "必須項目です。",
-        "email" => "メールアドレスの形式で入力してください。",
-        "numeric" => "数値で入力してください。",
-        "opinion.max" => "500文字以内で入力してください。"
+        "title.required" => "タイトルを入力してください",
+        "title.max" => "タイトルは20文字以内で入力してください",
+        "plan.max" => "内容は1000文字以内で入力してください",
+        "plan.required" => "内容を入力してください",
+        "date" => "正しい日時を入力してください",
+        "regex" => "日時は数字で入力してください",
         ];
       }
 }
