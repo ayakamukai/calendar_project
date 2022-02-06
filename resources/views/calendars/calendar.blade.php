@@ -6,7 +6,7 @@
 
   <div class="container">
     <div class="my-2 p-3 bg-white">
-      <h3>カレンダー</h3>
+      <h3>カレンダー!</h3>
       <h3 class="text-center">{{ $year }}年{{ $month }}月</h3>
 
         <div class="error text-alart">
